@@ -3,6 +3,7 @@ package com.example.Primeiro_Projeto.services;
 import com.example.Primeiro_Projeto.dtos.UserRequestDTO;
 import com.example.Primeiro_Projeto.dtos.UserResponseDTO;
 import com.example.Primeiro_Projeto.dtos.UserUpdateRequestDTO;
+import com.example.Primeiro_Projeto.exceptions.ResourceNotFoundException;
 import com.example.Primeiro_Projeto.model.Role;
 import com.example.Primeiro_Projeto.model.User;
 import com.example.Primeiro_Projeto.repositories.UserRepository;
@@ -33,12 +34,12 @@ public class UserService {
     public UserResponseDTO findUserById(Long id) {
         return userRepository.findById(id)
                 .map(UserResponseDTO::new)
-                .orElseThrow(() -> new RuntimeException("User com ID '" + id + "' não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", id));
     }
 
     public UserResponseDTO updateUser(Long id, UserUpdateRequestDTO requestUpdate) {
         User user = userRepository.findById(id)
-                .orElseThrow(() ->  new RuntimeException("User com ID '" + id + "' não encontrado"));
+                .orElseThrow(() ->  new ResourceNotFoundException("User", id));
 
         return updateUserField(user, requestUpdate);
     }
@@ -54,7 +55,7 @@ public class UserService {
 
     public void removeUser(Long id) {
         if(!userRepository.existsById(id)) {
-            throw new RuntimeException("User com ID '" + id + "' não encontrado");
+            throw new ResourceNotFoundException("User", id);
         }
 
         userRepository.deleteById(id);
