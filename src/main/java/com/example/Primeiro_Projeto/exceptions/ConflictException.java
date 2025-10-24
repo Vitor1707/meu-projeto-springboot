@@ -6,7 +6,7 @@ public class ConflictException extends RuntimeException{
         super(message);
     }
 
-    public ConflictException(String fieldName, String feldValue) {
-        super(fieldName + " '" + fieldName + "' já está em uso");
+    public ConflictException(String fieldName, String fieldValue) {
+        super(fieldName + " '" + fieldValue + "' já está em uso");
     }
 }
