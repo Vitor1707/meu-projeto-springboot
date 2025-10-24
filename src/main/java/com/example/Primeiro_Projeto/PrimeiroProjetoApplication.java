@@ -1,5 +1,6 @@
 package com.example.Primeiro_Projeto;
 
+import com.example.Primeiro_Projeto.model.Role;
 import com.example.Primeiro_Projeto.model.User;
 import com.example.Primeiro_Projeto.repositories.UserRepository;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ public class PrimeiroProjetoApplication {
 
             for(int i = 1; i <= 50; i++) {
                 User user = new User("User " + i, "user" + i + "@email.com");
+                user.getRoles().add(Role.USER);
                 userRepository.save(user);
             }
 

@@ -3,6 +3,7 @@ package com.example.Primeiro_Projeto.services;
 import com.example.Primeiro_Projeto.dtos.UserRequestDTO;
 import com.example.Primeiro_Projeto.dtos.UserResponseDTO;
 import com.example.Primeiro_Projeto.dtos.UserUpdateRequestDTO;
+import com.example.Primeiro_Projeto.model.Role;
 import com.example.Primeiro_Projeto.model.User;
 import com.example.Primeiro_Projeto.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -44,6 +45,8 @@ public class UserService {
 
     public UserResponseDTO saveUser(UserRequestDTO request) {
         User user = modelMapper.map(request, User.class);
+
+        user.getRoles().add(Role.USER);
 
         User userSaved = userRepository.save(user);
         return new UserResponseDTO(userSaved);
