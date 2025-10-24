@@ -17,4 +17,7 @@ public class UserRequestDTO {
     @NotBlank(message = "email é obrigatório")
     @Email(message = "formato de email inválido")
     private String email;
+    @NotBlank(message = "password é obrigatória")
+    @Size(min = 6, message = "password deve ter no mínimo 6 caracteres")
+    private String password;
 }

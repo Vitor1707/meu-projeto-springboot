@@ -14,4 +14,6 @@ public class UserUpdateRequestDTO {
     private String username;
     @Email(message = "formato de email inválido")
     private String email;
+    @Size(min = 6, message = "password deve ter no mínimo 6 caracteres")
+    private String password;
 }
