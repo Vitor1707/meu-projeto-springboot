@@ -56,6 +56,20 @@ public class UserService {
         return response;
     }
 
+    public UserResponseDTO updateMe(String currentUserEmail, UserUpdateRequestDTO requestUpdate) {
+        log.info(" Atualizando meu perfil User");
+        User user = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> {
+                    log.warn(" Email {} já está em uso", currentUserEmail);
+                    return new ResourceNotFoundException("User", "email", currentUserEmail);
+                });
+
+
+        UserResponseDTO response = updateUserField(user, requestUpdate);
+        log.info(" Perfil atualizado com sucesso");
+        return response;
+    }
+
     public UserResponseDTO saveUser(UserRequestDTO request) {
         log.info(" Criando user");
         User user = modelMapper.map(request, User.class);
@@ -71,6 +85,33 @@ public class UserService {
         log.info(" User {} criado com sucesso", userSaved.getEmail());
         return new UserResponseDTO(userSaved);
     }
+
+    public UserResponseDTO promoteToAdmin(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("USer", id));
+
+        if(user.getRoles().contains(Role.ADMIN)) {
+            throw new ConflictException("User já é ADMIN");
+        }
+
+        user.getRoles().add(Role.ADMIN);
+        User userUpdate = userRepository.save(user);
+        return new UserResponseDTO(userUpdate);
+    }
+
+    public UserResponseDTO removeFromAdmin(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("USer", id));
+
+        if(!user.getRoles().contains(Role.ADMIN)) {
+            throw new ConflictException("User não é ADMIN");
+        }
+
+        user.getRoles().remove(Role.ADMIN);
+        User userUpdate = userRepository.save(user);
+        return new UserResponseDTO(userUpdate);
+    }
+
 
     public void removeUser(Long id) {
         log.info(" Removendo User {}", id);
