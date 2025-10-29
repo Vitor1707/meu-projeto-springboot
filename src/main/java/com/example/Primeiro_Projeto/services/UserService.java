@@ -6,9 +6,12 @@ import com.example.Primeiro_Projeto.dtos.UserResponseDTO;
 import com.example.Primeiro_Projeto.dtos.UserUpdateRequestDTO;
 import com.example.Primeiro_Projeto.exceptions.ConflictException;
 import com.example.Primeiro_Projeto.exceptions.ResourceNotFoundException;
+import com.example.Primeiro_Projeto.model.Product;
 import com.example.Primeiro_Projeto.model.Role;
 import com.example.Primeiro_Projeto.model.User;
+import com.example.Primeiro_Projeto.repositories.ProductRepository;
 import com.example.Primeiro_Projeto.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,16 +30,17 @@ public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
+    private final ProductRepository productRepository;
 
-    public UserService(UserRepository userRepository, ModelMapper modelMapper) {
+    public UserService(UserRepository userRepository, ProductRepository productRepository) {
         this.userRepository = userRepository;
-        this.modelMapper = modelMapper;
+        this.productRepository = productRepository;
     }
 
     @Cacheable(value = "allUsers")
     public List<UserResponseDTO> getAllUsers() {
         log.info(LogMessages.RESOURCE_LIST_ALL + " - " + LogMessages.CACHE_SAVED, "users");
+        log.info(LogMessages.DATABASE_QUERY);
         return userRepository.findAllByOrderByIdAsc()
                 .stream()
                 .map(UserResponseDTO::new)
@@ -45,6 +50,7 @@ public class UserService {
     @Cacheable(value = "usersPage", key = "#pageable.getPageNumber + ' - ' + #pageable.getPageSize")
     public Page<UserResponseDTO> getUserPaginated(Pageable pageable) {
         log.info(LogMessages.RESOURCE_LIST_ALL + " - " + LogMessages.CACHE_SAVED, "users");
+        log.info(LogMessages.DATABASE_QUERY);
         Page<User> usersPage = userRepository.findAll(pageable);
 
         return usersPage.map(UserResponseDTO::new);
@@ -84,21 +90,60 @@ public class UserService {
         return response;
     }
 
-    @CacheEvict(value = {"allUsers", "usersPage"}, allEntries = true)
-    public UserResponseDTO saveUser(UserRequestDTO request) {
-        log.info(LogMessages.RESOURCE_CREATE, "user");
-        User user = modelMapper.map(request, User.class);
+    @CacheEvict(value = {"user", "allUsers", "usersPage", "productName", "productId", "allProducts", "productsPage"}, key = "#id_User")
+    public UserResponseDTO addProductForUser(Long id_User, Long id_Product) {
+        log.info(" Adicionado Product ao User - " + LogMessages.CACHE_CLEANING, "addProductForUser");
+        User user = userRepository.findById(id_User)
+                .orElseThrow(() -> {
+                    log.warn(LogMessages.RESOURCE_NOT_FOUND, "user", "id", id_User);
+                    return new ResourceNotFoundException("user", id_User);
+                });
+        Product product = productRepository.findById(id_Product)
+                .orElseThrow(() -> {
+                    log.warn(LogMessages.RESOURCE_NOT_FOUND, "product", "id", id_Product);
+                    return new ResourceNotFoundException("Product", id_Product);
+                });
 
-        if(userRepository.existsByEmail(request.getEmail())) {
-            log.warn(LogMessages.FIELD_CONFLICT, "email", request.getEmail());
-            throw new ConflictException("email", request.getEmail());
+        if(user.getProducts().contains(product)) {
+            log.warn("User já possui product");
+            throw new ConflictException(user.getUsername() + " já possui " + product.getName());
         }
 
-        user.getRoles().add(Role.USER);
+        user.getProducts().add(product);
+        product.getUsers().add(user);
 
-        User userSaved = userRepository.save(user);
-        log.info(LogMessages.OPERATION_SUCCESS, "saveUser");
-        return new UserResponseDTO(userSaved);
+        User userUpdate = userRepository.save(user);
+        productRepository.save(product);
+        log.info(LogMessages.OPERATION_SUCCESS, "addProductForUser");
+        return new UserResponseDTO(userUpdate);
+    }
+
+    @CacheEvict(value = {"user", "allUsers", "usersPage", "productName", "productId", "allProducts", "productsPage"}, key = "#id_User")
+    public UserResponseDTO removeProductFromUser(Long id_User, Long id_Product) {
+        log.info(" Removendo Product de User - " + LogMessages.CACHE_CLEANING, "removeProductFromUser");
+        User user = userRepository.findById(id_User)
+                .orElseThrow(() -> {
+                    log.warn(LogMessages.RESOURCE_NOT_FOUND, "user", "id", id_User);
+                    return new ResourceNotFoundException("user", id_User);
+                });
+        Product product = productRepository.findById(id_Product)
+                .orElseThrow(() -> {
+                    log.warn(LogMessages.RESOURCE_NOT_FOUND, "product", "id", id_Product);
+                    return new ResourceNotFoundException("Product", id_Product);
+                });
+
+        if(!user.getProducts().contains(product)) {
+            log.warn("User não possui product");
+            throw new ConflictException(user.getUsername() + " não possui " + product.getName());
+        }
+
+        user.getProducts().remove(product);
+        product.getUsers().remove(user);
+
+        User userUpdate = userRepository.save(user);
+        productRepository.save(product);
+        log.info(LogMessages.OPERATION_SUCCESS, "removeProductFromUser");
+        return new UserResponseDTO(userUpdate);
     }
 
     @CacheEvict(value = {"user", "allUsers", "usersPage"}, key = "#id")

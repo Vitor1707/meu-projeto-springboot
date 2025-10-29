@@ -15,7 +15,7 @@ public class LogMessages {
 
     public static final String CACHE_CLEANING = "Limpando cache para operação: {}";
     public static final String CACHE_SAVED = "Adicionado ao cache";
-    public static final String DATABASE_QUERY = "Executando consulta no banco: {}";
+    public static final String DATABASE_QUERY = "Executando consulta no banco de dados";
 
     public static final String OPERATION_SUCCESS = "Operação realizada com sucesso: {}";
     public static final String OPERATION_FAILED = "Falha na operaçaõ: {}";

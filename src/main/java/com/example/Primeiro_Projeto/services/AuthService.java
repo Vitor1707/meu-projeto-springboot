@@ -1,5 +1,6 @@
 package com.example.Primeiro_Projeto.services;
 
+import com.example.Primeiro_Projeto.config.LogMessages;
 import com.example.Primeiro_Projeto.dtos.LoginRequestDTO;
 import com.example.Primeiro_Projeto.dtos.UserRequestDTO;
 import com.example.Primeiro_Projeto.dtos.UserResponseDTO;
@@ -13,6 +14,7 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -39,8 +41,9 @@ public class AuthService {
     }
 
     @Transactional
+    @CacheEvict(value = {"allUsers", "usersPage"}, allEntries = true)
     public UserResponseDTO register(UserRequestDTO request) {
-        log.info(" Criando novo user");
+        log.info(LogMessages.RESOURCE_CREATE, "user");
         User user = modelMapper.map(request, User.class);
 
         if(userRepository.existsByEmail(user.getEmail())) {
@@ -53,8 +56,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         User userSaved = userRepository.save(user);
-        log.info(" User {} criado com sucesso", userSaved.getEmail());
-
+        log.info(LogMessages.OPERATION_SUCCESS, "saveUser");
         return new UserResponseDTO(userSaved);
     }
 

@@ -31,9 +31,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role_name")
     private List<Role> roles = new ArrayList<>();
-
-    public User(String username, String email) {
-        this.username = username;
-        this.email = email;
-    }
+    @ManyToMany
+    @JoinTable(
+            name = "users_products",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    private List<Product> products = new ArrayList<>();
 }

@@ -1,5 +1,6 @@
 package com.example.Primeiro_Projeto.controller;
 
+import com.example.Primeiro_Projeto.config.LogMessages;
 import com.example.Primeiro_Projeto.dtos.LoginRequestDTO;
 import com.example.Primeiro_Projeto.dtos.UserRequestDTO;
 import com.example.Primeiro_Projeto.dtos.UserResponseDTO;
@@ -28,9 +29,9 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> register(@RequestBody @Valid UserRequestDTO request) {
-        log.info(" POST /api/auth/register - Criar User");
+        log.info(" POST /api/auth/register - " + LogMessages.RESOURCE_CREATE, "user");
         UserResponseDTO response = authService.register(request);
-        log.info(" POST /api/auth/register - User Criado");
+        log.info(" POST /api/auth/register - " + LogMessages.OPERATION_SUCCESS, "saveUser");
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

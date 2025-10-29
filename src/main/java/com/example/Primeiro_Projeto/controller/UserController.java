@@ -37,7 +37,9 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         log.info(" GET /api/users/all - " + LogMessages.RESOURCE_LIST_ALL, "users");
-        return ResponseEntity.ok(userService.getAllUsers());
+        List<UserResponseDTO> response = userService.getAllUsers();
+        log.info(" GET /api/users/all - " + LogMessages.OPERATION_SUCCESS, "getAllUsers");
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -56,7 +58,7 @@ public class UserController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
 
         Page<UserResponseDTO> response = userService.getUserPaginated(pageable);
-
+        log.info(" GET /api/users - " + LogMessages.OPERATION_SUCCESS, "getUsersPaginated");
         return ResponseEntity.ok(response);
     }
 
@@ -64,7 +66,9 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> findUserById(@PathVariable Long id) {
         log.info(" GET /api/users/id/{} - " + LogMessages.RESOURCE_FIND_BY_FIELD, id, "user", "id");
-        return ResponseEntity.ok(userService.findUserById(id));
+        UserResponseDTO response = userService.findUserById(id);
+        log.info(" GET /api/users/id/{} - " + LogMessages.OPERATION_SUCCESS, id, "findUserById");
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/update")
@@ -87,13 +91,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDTO> saveUser(@RequestBody @Valid UserRequestDTO request) {
-        log.info(" POST /api/users - " + LogMessages.RESOURCE_CREATE, "user");
-        UserResponseDTO response = userService.saveUser(request);
-        log.info(" POST /api/users - " + LogMessages.OPERATION_SUCCESS, "saveUser");
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @PostMapping("{id_User}/add_product/{id_Product}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<UserResponseDTO> addProductForUser(@PathVariable Long id_User, @PathVariable Long id_Product) {
+        log.info(" POST /api/users/{}/product/{} - Adicionado Product ao User", id_User, id_Product);
+        UserResponseDTO response = userService.addProductForUser(id_User, id_Product);
+        log.info(" POST /api/users/{}/product/{} - " + LogMessages.OPERATION_SUCCESS, id_User, id_Product, "addProductForUser");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/promote_to_admin")
@@ -130,6 +134,15 @@ public class UserController {
         log.info(" DELETE /api/users/{}/remove_from_admin - Remover user de ADMIN", id);
         UserResponseDTO response = userService.removeFromAdmin(id);
         log.info(" DELETE /api/users/{}/remove_from_admin - " + LogMessages.OPERATION_SUCCESS, id, "removeFromAdmin");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("{id_User}/remove_product/{id_Product}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<UserResponseDTO> removeProductFromUser(@PathVariable Long id_User, @PathVariable Long id_Product) {
+        log.info(" DELETE /api/users/{}/product/{} - Removendo Product do User", id_User, id_Product);
+        UserResponseDTO response = userService.removeProductFromUser(id_User, id_Product);
+        log.info(" DELETE /api/users/{}/product/{} - " + LogMessages.OPERATION_SUCCESS, id_User, id_Product, "removeProductFromUser");
         return ResponseEntity.ok(response);
     }
 }
