@@ -6,7 +6,7 @@ public class LogMessages {
     public static final String RESOURCE_FIND_BY_FIELD = "Buscando {} por {}";
     public static final String RESOURCE_UPDATE = "Atualizando {} por {}";
     public static final String RESOURCE_CREATE = "Criando {} ";
-    public static final String RESOURCE_DELETE = "Deletando {} {}";
+    public static final String RESOURCE_DELETE = "Deletando {} por {}";
 
     public static final String RESOURCE_NOT_FOUND = "{} não encontrado com {} '{}' não encontrado";
 
