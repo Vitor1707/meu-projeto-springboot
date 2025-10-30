@@ -111,7 +111,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void deveRetornarUmProductAoBuscarProductPorId() {
+    void deveRetornarUmProductAoBuscarProductPorIdEIdExistir() {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product1));
 
         ProductResponseDTO result = productService.getProductById(1L);

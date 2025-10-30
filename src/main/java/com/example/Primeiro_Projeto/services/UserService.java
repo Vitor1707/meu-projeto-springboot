@@ -66,7 +66,7 @@ public class UserService {
 
     @CacheEvict(value = {"user", "allUsers", "usersPage"}, key = "#id")
     public UserResponseDTO updateUser(Long id, UserUpdateRequestDTO requestUpdate) {
-        log.info(LogMessages.RESOURCE_UPDATE + " - " + LogMessages.CACHE_CLEANING, "user", id, "updateUser");
+        log.info(LogMessages.RESOURCE_UPDATE + " - " + LogMessages.CACHE_CLEANING, "user", "id", "updateUser");
         User user = userRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn(LogMessages.RESOURCE_NOT_FOUND, "user", "id", id);
@@ -182,7 +182,7 @@ public class UserService {
 
     @CacheEvict(value = {"user", "allUsers", "usersPage"}, key = "#id")
     public void removeUser(Long id) {
-        log.info(LogMessages.RESOURCE_DELETE + " - " + LogMessages.CACHE_CLEANING, "user", id, "removeUser");
+        log.info(LogMessages.RESOURCE_DELETE + " - " + LogMessages.CACHE_CLEANING, "user", "id", "removeUser");
         if(!userRepository.existsById(id)) {
             log.warn(LogMessages.RESOURCE_NOT_FOUND, "user", "id", id);
             throw new ResourceNotFoundException("User", id);
